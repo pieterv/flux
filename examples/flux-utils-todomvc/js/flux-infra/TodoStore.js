@@ -26,7 +26,7 @@ class TodoStore extends ReduceStore<string, Todo> {
     return Immutable.OrderedMap();
   }
 
-  reduce (state: State, action: Action): State {
+  reduce(state: State, action: Action): State {
     switch (action.type) {
       case 'todo/complete':
         return state.setIn([action.id, 'complete'], true);

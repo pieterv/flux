@@ -15,31 +15,31 @@ import type Immutable from 'immutable';
 import type Todo from '../flux-infra/Todo';
 
 import React, {Component} from 'react';
+import Relay from 'react-relay';
 import {dispatch} from '../flux-infra/TodoDispatcher';
 
 type Props = {
   todos: Immutable.Map<string, Todo>,
 };
 
-export default class Footer extends Component<{}, Props, {}> {
+class Footer extends Component<{}, Props, {}> {
   render(): ?ReactElement {
-    const {todos} = this.props;
+    const {viewer: {totalCount, completedCount}} = this.props;
 
-    if (todos.size === 0) {
+    if (totalCount === 0) {
       return null;
     }
 
-    const completed = todos.reduce((x, todo) => todo.complete ? x + 1 : x, 0);
-    const itemsLeft = todos.size - completed;
+    const itemsLeft = totalCount - completedCount;
     const itemsLeftPhrase = itemsLeft === 1 ? ' item left' : ' items left';
 
     let clearCompletedButton;
-    if (completed > 0) {
+    if (completedCount > 0) {
       clearCompletedButton =
         <button
           id="clear-completed"
           onClick={this._onClearCompletedClick}>
-          Clear completed ({completed})
+          Clear completed ({completedCount})
         </button>;
     }
 
@@ -60,3 +60,17 @@ export default class Footer extends Component<{}, Props, {}> {
     dispatch({type: 'todo/destroy-completed'});
   }
 }
+
+export default Relay.createContainer(Footer, {
+  fragments: {
+    viewer: () => Relay.QL`
+      fragment on User {
+        todos {
+          id,
+        },
+        totalCount,
+        completedCount,
+      }
+    `,
+  },
+});

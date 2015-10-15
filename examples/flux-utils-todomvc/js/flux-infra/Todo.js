@@ -26,7 +26,7 @@ export default class Todo extends TodoRecord {
 
   constructor(text: string) {
     super({
-      id: Date.now() + Math.round(Math.random() * 1000),
+      id: (Date.now() + Math.round(Math.random() * 1000)) + '',
       complete: false,
       text,
     });

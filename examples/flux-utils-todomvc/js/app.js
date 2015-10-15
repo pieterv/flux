@@ -12,6 +12,31 @@
 'use strict';
 
 import React from 'react';
+import ReactDOM from 'react-dom';
+import Relay from 'react-relay';
 import TodoApp from './components/TodoApp.react';
+import RelayLocalSchema from 'relay-local-schema';
+import {schema} from './flux-infra/schema';
 
-React.render(<TodoApp />, document.getElementById('todoapp'));
+class TodoRoute extends Relay.Route {}
+TodoRoute.routeName = 'Todo';
+TodoRoute.queries = {
+  viewer: (Component) => Relay.QL`
+    query TodoQuery {
+      viewer {
+        ${Component.getFragment('viewer')}
+      },
+    }
+  `,
+};
+
+
+Relay.injectNetworkLayer(new RelayLocalSchema.NetworkLayer({schema}));
+
+ReactDOM.render(
+  <Relay.RootContainer
+     Component={TodoApp}
+     route={new TodoRoute()}
+   />,
+   document.getElementById('todoapp')
+ );

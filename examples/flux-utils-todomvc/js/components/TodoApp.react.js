@@ -11,52 +11,40 @@
 
 'use strict';
 
-/**
- * This component operates as a "Controller-View".  It listens for changes in
- * the TodoStore and passes the new data to its children.
- */
-
-import type Immutable from 'immutable';
-import type {Store} from 'flux/utils';
-import type Todo from '../flux-infra/Todo';
-
-import {Container} from 'flux/utils';
 import Footer from './Footer.react';
 import Header from './Header.react';
 import MainSection from './MainSection.react';
 import React, {Component} from 'react';
-import TodoStore from '../flux-infra/TodoStore';
+import wrapWithRelayMagic from '../flux-infra/wrapWithRelayMagic';
+import Relay from 'react-relay';
 
-type State = {
-  todos: Immutable.Map<string, Todo>,
-  areAllComplete: boolean,
-};
+var STORES = [
+  require('../flux-infra/TodoStore'),
+];
 
-class TodoApp extends Component<{}, {}, State> {
-  static getStores(): Array<Store> {
-    return [TodoStore];
-  }
-
-  static calculateState(prevState: ?State): State {
-    return {
-      todos: TodoStore.getState(),
-      areAllComplete: TodoStore.areAllComplete(),
-    };
-  }
-
+class TodoApp extends Component {
   render(): ?ReactElement {
     return (
       <div>
         <Header />
         <MainSection
-          todos={this.state.todos}
-          areAllComplete={this.state.areAllComplete}
+          viewer={this.props.viewer}
         />
-        <Footer todos={this.state.todos} />
+        <Footer
+          viewer={this.props.viewer}
+        />
       </div>
     );
   }
 }
 
-const TodoAppContainer = Container.create(TodoApp);
-export default TodoAppContainer;
+export default Relay.createContainer(wrapWithRelayMagic(TodoApp, STORES), {
+  fragments: {
+    viewer: () => Relay.QL`
+      fragment on User {
+        ${MainSection.getFragment('viewer')}
+        ${Footer.getFragment('viewer')}
+      }
+    `,
+  },
+});

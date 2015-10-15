@@ -16,6 +16,7 @@ import type Todo from '../flux-infra/Todo';
 import {dispatch} from '../flux-infra/TodoDispatcher';
 import React, {Component} from 'react';
 import TodoTextInput from './TodoTextInput.react';
+import Relay from 'react-relay';
 
 import classnames from 'classnames';
 
@@ -27,7 +28,7 @@ type State = {
   isEditing: boolean,
 };
 
-export default class TodoItem extends Component<{}, Props, State> {
+class TodoItem extends Component<{}, Props, State> {
   state = {
     isEditing: false,
   }
@@ -106,3 +107,15 @@ export default class TodoItem extends Component<{}, Props, State> {
     });
   }
 }
+
+export default Relay.createContainer(TodoItem, {
+  fragments: {
+    todo: () => Relay.QL`
+      fragment on Todo {
+        id,
+        text,
+        complete,
+      }
+    `,
+  },
+});

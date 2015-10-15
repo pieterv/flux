@@ -17,23 +17,25 @@ import type Todo from '../flux-infra/Todo';
 import {dispatch} from '../flux-infra/TodoDispatcher';
 import React, {Component} from 'react';
 import TodoItem from './TodoItem.react';
+import Relay from 'react-relay';
 
 type Props = {
   todos: Immutable.Map<string, Todo>,
   areAllComplete: boolean,
 };
 
-export default class MainSection extends Component<{}, Props, {}> {
+class MainSection extends Component<{}, Props, {}> {
   render(): ?ReactElement {
-    const {todos, areAllComplete} = this.props;
+    const {viewer: {totalCount, completedCount, todos}} = this.props;
+    const areAllComplete = totalCount === completedCount;
 
-    if (todos.size === 0) {
+    if (totalCount === 0) {
       return null;
     }
 
     const todoItems = [];
-    for (let [id, todo] of todos) {
-      todoItems.push(<TodoItem key={id} todo={todo} />);
+    for (let todo of todos) {
+      todoItems.push(<TodoItem key={todo.id} todo={todo} />);
     }
 
     return (
@@ -54,3 +56,18 @@ export default class MainSection extends Component<{}, Props, {}> {
     dispatch({type: 'todo/toggle-complete-all'});
   }
 }
+
+export default Relay.createContainer(MainSection, {
+  fragments: {
+    viewer: () => Relay.QL`
+      fragment on User {
+        todos {
+          id,
+          ${TodoItem.getFragment('todo')}
+        },
+        totalCount,
+        completedCount,
+      }
+    `,
+  },
+});

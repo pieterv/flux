@@ -11,6 +11,7 @@ This will install all dependencies.
 
 To build the project, first run this command:
 
+    npm run update-schema # If you update schema.json
     npm start
 
 This will perform an initial build and start a watcher process that will update bundle.js with any changes you wish to make.  This watcher is based on [Browserify](http://browserify.org/) and [Watchify](https://github.com/substack/watchify), and it transforms React's JSX syntax into standard JavaScript with [Babelify](https://github.com/babel/babelify).
